@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora del dígito de Control EAN-13</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #015196;
+            
+        }
+
+        h1 {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            color: white;
+            font-size: 20px;
+        }
+
+        img {
+            margin-top: 20px;
+            width: 150px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+            font-size: 16px;
+            color: white;
+        }
+
+        input {
+            padding: 8px;
+            font-size: 16px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #resultado {
+            margin: 9px;
+            font-size: 20px;
+            color: white;
+        }
+
+        #referencia {
+            margin: 5px;
+            font-size: 16px;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <img id="logo" src="src\fermax-02.png" alt="">
+    <h1>Calculadora dígito control Ean13</h1>
+
+    <label for="eanInput">Introduzca una referencia comercial:</label>
+    <input type="text" id="eanInput" maxlength="8" autofocus>
+    <!--   <button onclick="calculateCheckDigit()">Calcular</button> -->
+
+    <p id="resultado"></p>
+    <p id="referencia"></p>
+ 
+
+    <script>
+        function calculateCheckDigitOnEnter(event) {
+            if (event.key === "Enter") {
+                calculateCheckDigit();
+            }
+        }
+
+        function calculateCheckDigit() {
+            var ref = document.getElementById("eanInput").value;
+            var refOnlyLetters = removeNumbers(ref);
+            var refOnlyNumbers = removeLettersFromLeft(ref);
+
+            if (refOnlyNumbers.length < 5) {
+                refOnlyNumbers = "0" + refOnlyNumbers;
+            } else {
+                refOnlyNumbers = refOnlyNumbers;
+            }
+            var input = "8424299" + refOnlyNumbers;
+
+            if (input.length === 12 && /^\d+$/.test(input)) {
+                var sum = 0;
+                for (var i = 0; i < 12; i++) {
+                    var factor = (i % 2 === 0) ? 1 : 3;
+                    sum += parseInt(input.charAt(i)) * factor;
+                }
+                var checksum = (10 - (sum % 10)) % 10;
+
+                document.getElementById("referencia").innerText = `"${removeLeadingZeros(refOnlyLetters + refOnlyNumbers)}"`;
+                document.getElementById("resultado").innerText = input + checksum;
+                document.getElementById("eanInput").value = "";
+            } else {
+                document.getElementById("resultado").innerText = "Introduzca una referencia válida";
+                document.getElementById("referencia").innerText = "";
+            }
+        }
+
+        function removeLettersFromLeft(reference) {
+            var onlyNumbers = "";
+            var foundNumber = false;
+
+            for (var i = 0; i < reference.length; i++) {
+                if (!isNaN(reference[i]) && !foundNumber) {
+                    foundNumber = true;
+                }
+                if (foundNumber) {
+                    onlyNumbers += reference[i];
+                }
+            }
+            return onlyNumbers;
+        }
+
+        function removeNumbers(inputString) {
+            return inputString.replace(/\d/g, '').toUpperCase();
+        }
+
+        function removeLeadingZeros(inputString) {
+            return inputString.replace(/^0+/, '');
+        }
+
+        document.getElementById("eanInput").addEventListener("keyup", calculateCheckDigitOnEnter);
+
+    </script>
+</body>
+
+</html>
